@@ -1,6 +1,7 @@
-import { credentials } from './Keys'; 
+import { credentials } from './Keys.js';
+import axios from 'axios';
 
-const axios = require('axios');
+//const axios = require('axios');
 
 // Reddit API credentials
 const clientId = credentials.clientId;
@@ -55,11 +56,17 @@ async function makePost(accessToken, subreddit, title, content) {
 
 // Execute the script
 (async () => {
+
   const accessToken = await authenticate();
-  if (accessToken) {
-    const subreddit = 'YOUR_SUBREDDIT'; // Replace with the subreddit you want to post to
-    const title = 'My Awesome Post';
-    const content = 'Hello, Reddit! This is my first post using a Node.js script.';
-    await makePost(accessToken, subreddit, title, content);
+  if (!accessToken) {return}
+  else {
+    console.log('Connected');
+    return;
   }
+
+  const subreddit = 'YOUR_SUBREDDIT'; // Replace with the subreddit you want to post to
+  const title = 'My Awesome Post';
+  const content = 'Hello, Reddit! This is my first post using a Node.js script.';
+  await makePost(accessToken, subreddit, title, content);
+
 })();
