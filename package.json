@@ -1,0 +1,11 @@
+{
+  "name": "spreddit",
+  "version": "1.0.0",
+  "description": "A Reddit promotion script",
+  "main": "Spreddit.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC"
+}
