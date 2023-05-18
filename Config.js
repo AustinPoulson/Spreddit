@@ -9,3 +9,11 @@ export const entries = [
     score: 10, // used for chance of posting - 10 always posts - 0 never posts - decimals allowed
   }
 ]
+
+export const subreddits = [
+  {
+    name: 'name',
+    format: 'artist -- title [genre] (year)',
+    restrictions: ['youtubeOnly']
+  }
+]
