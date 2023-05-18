@@ -1,5 +1,6 @@
 import { credentials } from './Keys.js';
 import axios from 'axios';
+import { entries } from './Config';
 
 //const axios = require('axios');
 
@@ -59,14 +60,16 @@ async function makePost(accessToken, subreddit, title, content) {
 
   const accessToken = await authenticate();
   if (!accessToken) {return}
-  else {
-    console.log('Connected');
-    return;
-  }
+  entries.forEach((entry) => {
+    let chance = Math.random() * 11;
+    if (chance > entry.score) {
 
-  const subreddit = 'YOUR_SUBREDDIT'; // Replace with the subreddit you want to post to
-  const title = 'My Awesome Post';
-  const content = 'Hello, Reddit! This is my first post using a Node.js script.';
-  await makePost(accessToken, subreddit, title, content);
+    }
+  })
+
+  //const subreddit = 'YOUR_SUBREDDIT'; // Replace with the subreddit you want to post to
+  //const title = 'My Awesome Post';
+  //const content = 'Hello, Reddit! This is my first post using a Node.js script.';
+  //await makePost(accessToken, subreddit, title, content);
 
 })();
