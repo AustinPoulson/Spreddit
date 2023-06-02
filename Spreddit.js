@@ -1,18 +1,9 @@
 import { credentials } from './Keys.js';
 import axios from 'axios';
-import { entries } from './Config';
-
-//const axios = require('axios');
-
-// Reddit API credentials
-const clientId = credentials.clientId;
-const clientSecret = credentials.clientSecret;
-const username = credentials.username;
-const password = credentials.password;
-const userAgent = credentials.userAgent;
+import { entries, subreddits } from './Config';
 
 // Authenticate with Reddit API
-async function authenticate() {
+async function authenticate(clientId, clientSecret, username, password, userAgent) {
   try {
     const response = await axios.post('https://www.reddit.com/api/v1/access_token', 
       `grant_type=password&username=${username}&password=${password}`,
@@ -55,21 +46,38 @@ async function makePost(accessToken, subreddit, title, content) {
   }
 }
 
+async function postFromRandomAccount(subreddit, title, content) {
+  const {clientId, clientSecret, username, password, userAgent} = credentials[Math.floor(Math.random()*credentials.length)]
+  const accessToken = await authenticate(clientId, clientSecret, username, password, userAgent);
+  if (!accessToken) {return}
+  makePost(accessToken, subreddit, title, content);
+}
+
+function formatTitle(entry, format) {
+  for (var key in entry) {
+    format = format.replace(key, entry.key);
+  }
+  return format;
+}
+
 // Execute the script
 (async () => {
 
-  const accessToken = await authenticate();
-  if (!accessToken) {return}
   entries.forEach((entry) => {
-    let chance = Math.random() * 11;
+    const chance = Math.random() * 11;
     if (chance > entry.score) {
-
+      const subredditName = entry.subreddits[Math.floor(Math.random()*entry.subreddits.length)];
+      const subredditObj = subreddits.find(item => item.name === subredditName);
+      if (subredditObj.restrictions !== []) {
+        // TODO set limitations here
+      }
+      const title = formatTitle(entry, subredditObj.format);
+      const content = entry.links[Math.floor(Math.random()*entry.links.length)];
+      postFromRandomAccount(subredditName, title, content)
+        .then(setTimeout(() => {}, 600000))
+        .then((response) => console.log(response))
+        .catch((error) => console.log(error));
     }
   })
-
-  //const subreddit = 'YOUR_SUBREDDIT'; // Replace with the subreddit you want to post to
-  //const title = 'My Awesome Post';
-  //const content = 'Hello, Reddit! This is my first post using a Node.js script.';
-  //await makePost(accessToken, subreddit, title, content);
 
 })();
