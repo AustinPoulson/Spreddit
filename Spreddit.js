@@ -1,6 +1,6 @@
 import { credentials } from './Keys.js';
 import axios from 'axios';
-import { entries, subreddits } from './Config';
+import { entries, subreddits } from './Config.js';
 
 // Authenticate with Reddit API
 async function authenticate(clientId, clientSecret, username, password, userAgent) {
@@ -25,13 +25,13 @@ async function authenticate(clientId, clientSecret, username, password, userAgen
 }
 
 // Make a post on Reddit
-async function makePost(accessToken, subreddit, title, content) {
+async function makePost(accessToken, subreddit, title, content, userAgent) {
   try {
     const response = await axios.post(`https://oauth.reddit.com/r/${subreddit}/api/submit`, 
       {
         title: title,
-        kind: 'self',
-        text: content
+        kind: 'link',
+        url: content
       },
       {
         headers: {
@@ -40,17 +40,24 @@ async function makePost(accessToken, subreddit, title, content) {
         }
       }
     );
-    console.log('Post created successfully:', response.data);
+    interfaceLog(response);
   } catch (error) {
-    console.error('Failed to create post:', error.message);
+    return error;
   }
 }
 
 async function postFromRandomAccount(subreddit, title, content) {
+  interfaceLog('Authenticating...');
   const {clientId, clientSecret, username, password, userAgent} = credentials[Math.floor(Math.random()*credentials.length)]
   const accessToken = await authenticate(clientId, clientSecret, username, password, userAgent);
-  if (!accessToken) {return}
-  makePost(accessToken, subreddit, title, content);
+  if (!accessToken) {
+    interfaceLog('Authentication Failed');
+    return
+  }
+  interfaceLog('Authentication Passed: ' + accessToken);
+  makePost(accessToken, subreddit, title, content, userAgent)
+    .then((response) => {return response})
+    .catch((error) => {return error});
 }
 
 function formatTitle(entry, format) {
@@ -60,15 +67,23 @@ function formatTitle(entry, format) {
   return format;
 }
 
+function interfaceLog(log){
+  console.log(log);
+}
+
 // Execute the script
 (async () => {
 
+  interfaceLog('Starting...');
   entries.forEach((entry) => {
-    const chance = Math.random() * 11;
-    if (chance > entry.score) {
+    interfaceLog('Rolling dice');
+    const chance = (Math.random() * 11);
+    if (chance < entry.score) {
+      interfaceLog('Dice roll passed, checking subreddit');
       const subredditName = entry.subreddits[Math.floor(Math.random()*entry.subreddits.length)];
       const subredditObj = subreddits.find(item => item.name === subredditName);
       if (subredditObj.restrictions !== []) {
+        interfaceLog('Checking subreddit posting requirements');
         // TODO set limitations here
       }
       const title = formatTitle(entry, subredditObj.format);
